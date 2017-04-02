@@ -3,54 +3,8 @@
 # Date: 3/24/17
 # Description: Room Assignment
 ###########################################################################################
-from Tkinter import *           
+from Tkinter import *
 
-class ExitL(object):
-	
-	def __init__(self, room, locked = "False"):
-		self.room = room
-		self.locked = locked
-		
-	@property
-	def room(self):
-		return self._room
-		
-	@room.setter
-	def room(self, value):
-		self._room = value
-		
-	@property
-	def locked(self):
-		return self._locked
-		
-	@locked.setter
-	def locked(self, value):
-		self._locked = value
-		
-class ItemL(self, desc, usage):
-
-	def __init__(self, desc, usage):
-		
-		self.desc = desc
-		self.usage = usage
-		
-	@property
-	def desc(self):
-		return self._desc
-		
-	@room.setter
-	def desc(self, value):
-		self._desc = value
-		
-	@property
-	def usage(self):
-		return self._usage
-		
-	@locked.setter
-	def usage(self, value):
-		self._usage = value
-		
-	
 # the room class
 # note that this class is fully implemented with dictionaries as illustrated in the lesson "More on Data Structures"
 class Room(object):
@@ -111,14 +65,14 @@ class Room(object):
     # the room is an instance of a room
     def addExit(self, exit, room, locked):
         # append the exit and room to the appropriate dictionary
-        self._exits[exit] = ExitL(room, locked)
+        self._exits[exit] = [room, locked]
 
     # adds an item to the room
     # the item is a string (e.g., table)
     # the desc is a string that describes the item (e.g., it is made of wood)
     def addItem(self, item, desc, usage):
         # append the item and description to the appropriate dictionary
-        self._items[item] = {desc : usage}
+        self._items[item] = [desc, usage]
 
     # adds a grabbable item to the room
     # the item is a string (e.g., key)
@@ -163,7 +117,7 @@ class Game(Frame):
         global currentRoom
         global r8
         global r9
-        
+
         r1 = Room("Room 1")
         r2 = Room("Room 2")
         r3 = Room("Room 3")
@@ -203,11 +157,11 @@ class Game(Frame):
         r5.addExit("north", r6, "False")
         r5.addGrabbable("cheese_soup")
         r5.addItem("soup_dispenser", "It looks like it produces some sort of soup", "cheese_soup has been made, eat it soon!")
-        
+
         r6.addExit("south", r5, "False")
         r6.addExit("west", r7, "False")
         r6.addItem("statue", "There is a button that can be pressed.", "As the statue crumbles, the sounds of a ladder appearing seem to come from Room 8.")
-        
+
         r7.addExit("east", r6, "False")
         r7.addExit("south", r8, "False")
         r7.addItem("sofa", "This sofa looks really worn, there is dust everywhere.", "You could rest here, but you should be more worried about getting out of here.")
@@ -220,21 +174,21 @@ class Game(Frame):
         r9.addExit("ladder", r8, "False")
         r9.addExit("north", r10, "False")
         r9.addItem("dusty_trinkets", "Wow, whoever lives in this house must have been rich, there's a lot of antique stuff laying around!", "Nothing of use lies in the pile of goods.")
-        
+
         r10.addExit("south", r9, "False")
         r10.addItem("dusty_computer", "I wonder who threw this computer away? Wait... as I look closer I see faint letters written on it... oh wait it's actually a Mac. Nevermind.", "Let's be real, there are no uses for a Mac.")
         r10.addGrabbable("second_key")
         r10.addItem("old_desk", "On it rests a dusty_computer and the second_key.", "Perhaps the key that rests here is for the door in Room 4.")
 
         currentRoom = r1
-        
+
     def addLadder():                    #This creates the exit in room 8 that allows access to the second_key and the end of the game.
 
         global r8
         global r9
-        
+
         r8.addExit("ladder", r9, "False")
-        
+
 
     # sets up the GUI
     def setupGUI(self):
@@ -249,14 +203,14 @@ class Game(Frame):
         Game.player_input.bind(("<Return>"), self.process)
         Game.player_input.pack(side=BOTTOM, fill=X)
         Game.player_input.focus()
-        
+
         #setup the image to the left of the GUI
         img = None
         Game.image = Label(self, width=WIDTH / 2, image = img)
         Game.image.image = img
         Game.image.pack(side=LEFT, fill = Y)
         game.image.pack_propagate(False)
-        
+
         #setup the text on the right of the GUI
         text_frame = Frame(self, width=WIDTH / 2)
         Game.text = Text(text_frame, bg="lightgrey", state=DISABLED)
@@ -270,7 +224,7 @@ class Game(Frame):
             Game.img = PhotoImage(file="skull.gif")
         else:
             Game.img = PhotoImage(file=Game.currentRoom.image)
-        
+
         Game.image.config(image=Game.image)
         Game.image.image = Game.img
 
@@ -286,7 +240,7 @@ class Game(Frame):
                 "\n You are carrying: " + str(Game.inventory) +\
                 "\n\n" + status
         Game.text.config(state=DISABLED)
-        
+
     # plays the game
     def play(self):
         # add the rooms to the game
@@ -305,93 +259,87 @@ class Game(Frame):
         response = "I don't understand. Try (Verb) (Noun). Valid verbs are go, look, use, and take."
 
     words = action.split()
-    
+
     #makes sure user can only type 2 words
     if (len(words) == 2):
-    
+
         verb = words[0]
         noun = words[1]
-        
+
         #adds functionality to "go" verb
         if (verb == "go"):
             response = "Invalid exit."
 
-            for i in range(len(Game.currentRoom.exits)):
-            
-                if (noun == Game.currentRoom.exits[i]):
-                
-                    if Game.currentRoom.exits.room == "True":
-                        response = "The door is locked."
-                        
-                    else:
-                        Game.currentRoom = Game.currentRoom.exits.[i]
-                        response = "Room Changed."
-                        break
+			if noun in Game.currentRoom.exits:
+
+                if Game.currentRoom.exits[noun][1] == "True":
+                    response = "The door is locked."
+
+                else:
+
+                    Game.currentRoom = Game.currentRoom.exits[noun][0]
+                    response = "Room Changed."
+
 
     #functionality for "look" verb
         elif (verb == "look"):
-        
+
             response = "I don't see that item."
-            for i in range(len(currentRoom.items)):
-                if (noun == currentRoom.items[i]):
-                    response = currentRoom.description[i]
+
+			if noun in Game.currentRoom.items:
+
+				response = Game.currentRoom.items[noun][0]
 
     #functionality for "take" verb
         elif (verb == "take"):
-        
+
             response = "I don't see that item"
-            for i in range(len(currentRoom.grabbables)):
-            
-                if (noun == currentRoom.grabbables[i]):
-                
+            for i in range(len(Game.currentRoom.grabbables)):
+
+                if (noun == Game.currentRoom.grabbables[i]):
+
                     inventory.append(noun)
                     currentRoom.delGrabbable(i)
                     response = "Item grabbed."
                     break
+
     #functionality for "use" verb
         elif (verb == "use"):
-        
+
             response = ("This item has no uses. Only items in the room or your inventory can be used.")
-            
-            for i in range(len(currentRoom.items)):
+
+        	if noun in Game.currentRoom.items
         #these two if statements allow the ladder puzzle on floor 2 to function
-                if (noun == currentRoom.items[i]):
-                    if (noun == "statue"):
-                        addLadder()
-                        currentRoom.items.remove(noun)
-                        response = currentRoom.usage[i]
-                        break
-                        
-        #this is so that the program knows what response to use according to the list of items in current room.         
-            for i in range(len(currentRoom.items)):
+                if (noun == "statue"):
+                    addLadder()
+					response = Game.currentRoom.items[noun][1]
+					del Game.currentRoom.items[noun]
 
-                if (noun == currentRoom.items[i]):
+        #this is so that the program knows what response to use according to the list of items in current room.
+				else:
+					response = Game.currentRoom.items[noun][1]
 
-                    response = currentRoom.usage[i]
-                    break
-                    
         #adds functionality of using either key in room 1 and room 4
-            if (noun == "key") and (currentRoom == "Room 1" or "Room 4"):
-            
-                for i in range(len(currentRoom.exits)):
-                    currentRoom.exitLocked[i] = "False"
+            if (noun == "key") and (Game.currentRoom == "Room 1" or "Room 4"):
+
+				Game.currentRoom.exits["south"][1] = "False"
+                Game.currentRoom.exits["east"][1] = "False"
                 inventory.remove("key")
                 response = "The doors are open"
-                
-            if (noun == "second_key") and (currentRoom == "Room 1" or "Room 4"):
-            
-                for i in range(len(currentRoom.exits)):
-                    currentRoom.exitLocked[i] = "False"
+
+            if (noun == "second_key") and (Game.currentRoom == "Room 1" or "Room 4"):
+
+                Game.currentRoom.exits["south"][1] = "False"
                 inventory.remove("second_key")
                 response = "The locked door is open"
 
-        #this is so the note can be used at any time regardless of whatever room the user is in.    
+        #this is so the note can be used at any time regardless of whatever room the user is in.
             if (noun == "note"):
 
                 response = "It's hard to discern what the note says, but it mentions something about the statue in room 6 and room 8."
 
     print response
-        
+
 
 ##########################################################
 # the default size of the GUI is 800x600
